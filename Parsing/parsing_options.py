@@ -1,6 +1,6 @@
 import asyncio
-import datetime
-from datetime import timedelta, date
+
+from datetime import timedelta, date, datetime
 
 import aiohttp
 import aiofiles
@@ -31,10 +31,12 @@ async def get_json_options(url, product_id):
             async with session.get(url, headers=HEADERS) as response:
                 try:
                     r = await response.json(encoding="utf-8")
-                    print(f"{url=}  {r=}")
+                    # print(f"{url=}  {r=}")
                 except ContentTypeError:
                     print(f"Content type error, адрес {url} попробуем еще позже!")
-                    task = asyncio.create_task(get_json_options(url=url))
+                    task = asyncio.create_task(
+                        get_json_options(url=url, product_id=product_id)
+                    )
                     TASKS.append(task)
                     print(f"{url} задача не выполнена")
                     return
@@ -46,7 +48,7 @@ async def get_json_options(url, product_id):
                     await orm_add_options(obj)
 
         except ClientConnectorError as e:
-            task = asyncio.create_task(get_json_options(url=url))
+            task = asyncio.create_task(get_json_options(url=url, product_id=product_id))
             TASKS.append(task)
             print(f"Ошибка семафора {e}  {url}")
             return
@@ -60,18 +62,18 @@ async def get_options():
     # products = await orm_get_products()
     # for product in products:
     #     print(product.id, product.name)
-
-    while count < 100:
+    work_time = datetime.strptime("2024-11-03 20:45:00", "%Y-%m-%d %H:%M:%S")
+    # while count < 10000:
+    while datetime.now() < work_time:
+        # products = await orm_get_products()
+        # while products:
         products = await orm_get_products()
+        # products = 0
         for product in products:
             count += 1
             url = await get_url_options(product.id)
-
-            data = {
-                "id": product.id,
-                "updated": datetime.datetime.now(),
-            }
-            # await orm_update_product(data)
+            product.updated = datetime.now()
+            await orm_update_product(product)
 
             task = asyncio.create_task(get_json_options(url=url, product_id=product.id))
             tasks.append(task)
@@ -86,7 +88,7 @@ async def get_options():
                     tasks = TASKS[:]
                     TASKS = []
                     await asyncio.gather(*TASKS)
-                print(f"Пауза 5 сек, {x=}, {len(tasks)=}")
+                print(f"Пауза 5 сек, {x=}, {len(tasks)=} {datetime.now()}")
                 await asyncio.sleep(5)
                 print(
                     f"Не выполненные задачи, что смогли выполнились. осталось {len(tasks)}"

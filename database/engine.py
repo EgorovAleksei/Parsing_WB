@@ -7,11 +7,11 @@ from sqlalchemy.ext.asyncio import async_sessionmaker, AsyncSession, create_asyn
 
 from database.models import Base, Product
 
-load_dotenv(find_dotenv('../.env'))
+load_dotenv(find_dotenv("../.env"))
 
-engine = create_async_engine(os.getenv('DB_URL'), echo=False)
+engine = create_async_engine(os.getenv("DB_URL_NET"), echo=False)
 
-#session_maker = async_sessionmaker(bind=engine, class_=AsyncSession, expire_on_commit=False)
+# session_maker = async_sessionmaker(bind=engine, class_=AsyncSession, expire_on_commit=False)
 session_maker = async_sessionmaker(bind=engine)
 
 
@@ -23,8 +23,7 @@ async def create_db():
 async def drop_db():
     async with engine.begin() as conn:
         ...
-        #await conn.run_sync(Base.metadata.drop_all)
-        #await conn.run_sync(Base.metadata.tables['options'].drop)
-        #await conn.run_sync(Base.metadata.tables['product'].drop)
-        #await conn.run_sync(Base.metadata.tables['brand'].drop)
-
+        # await conn.run_sync(Base.metadata.drop_all)
+        # await conn.run_sync(Base.metadata.tables['options'].drop)
+        # await conn.run_sync(Base.metadata.tables['product'].drop)
+        # await conn.run_sync(Base.metadata.tables['brand'].drop)

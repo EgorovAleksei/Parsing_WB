@@ -24,13 +24,13 @@ class Base(DeclarativeBase):
 
     repr_cols_num = 3
     repr_cols = tuple()
-
-    def __repr__(self):
-        cols = []
-        for idx, col in enumerate(self.__table__.columns.keys()):
-            if col in self.repr_cols or idx < self.repr_cols_num:
-                cols.append(f"{col}={getattr(self, col)}")
-        return f"<{self.__class__.__name__} {', '.join(cols)}"
+    #
+    # def __repr__(self):
+    #     cols = []
+    #     for idx, col in enumerate(self.__table__.columns.keys()):
+    #         if col in self.repr_cols or idx < self.repr_cols_num:
+    #             cols.append(f"{col}={getattr(self, col)}")
+    #     return f"<{self.__class__.__name__} {', '.join(cols)}"
 
 
 class Category(Base):
@@ -54,6 +54,73 @@ class Category(Base):
     rght: Mapped[int]
     tree_id: Mapped[int]
     level: Mapped[int]
+
+    # product: Mapped["Product"] = relationship()
+
+
+class Options(Base):
+    __tablename__ = "options"
+
+    id: Mapped[intpk]
+    nm_id: Mapped[int] = mapped_column(ForeignKey("product.id", ondelete="CASCADE"))
+    card: Mapped[dict[Any, Any]]
+
+
+class Brand(Base):
+    __tablename__ = "brand"
+
+    id: Mapped[intpk]
+    wb_id: Mapped[int]
+    name: Mapped[str]
+
+
+class Product(Base):
+    __tablename__ = "product"
+
+    id: Mapped[intpk]
+    # wb_id: Mapped[int]
+    name: Mapped[str]
+    price: Mapped[int] = mapped_column(default=None)
+    quantity: Mapped[int] = mapped_column(default=0)
+    brand: Mapped[int | None] = mapped_column(
+        ForeignKey("brand.id", onupdate="SET NULL")
+    )
+    category: Mapped[int] = mapped_column(
+        ForeignKey("categories.id", ondelete="CASCADE")
+    )
+    root: Mapped[int | None]
+    subjectId: Mapped[int | None]
+    rating: Mapped[int | None]
+    pics: Mapped[dict[Any, Any]]
+    # price_history: Mapped[list[dict[Any, Any]]] = mapped_column(type_=JSONB)
+    price_history: Mapped[dict[Any, Any]] = mapped_column(type_=JSONB)
+    discount: Mapped[int] = mapped_column(default=0)
+    price_history_check: Mapped[bool] = mapped_column(default=False)
+
+    repr_cols_num = 3
+    repr_cols = ("category", "subjectID", "updated")
+
+    category_relationship: Mapped["Category"] = relationship()
+
+
+# class ProductWB(Base):
+#     __tablename__ = 'productwb'
+#
+#     id: Mapped[intpk]
+#     wb_id: Mapped[int]
+#     name: Mapped[str]
+#     price: Mapped[int] = mapped_column(default=None)
+#     quantity: Mapped[int] = mapped_column(default=0)
+#     brand: Mapped[int | None] = mapped_column(ForeignKey('brand.id', onupdate='SET NULL'))
+#     category: Mapped[int] = mapped_column(ForeignKey('category.id', ondelete='CASCADE'))
+#     root: Mapped[int | None]
+#     subjectId: Mapped[int | None]
+#     rating: Mapped[int | None]
+#     pics: Mapped[dict[Any, Any]]
+#     price_history: Mapped[list[dict[Any, Any]]] = mapped_column(type_=JSONB)
+#
+#     repr_cols_num = 3
+#     repr_cols = ('category', 'subjectID', 'updated')
 
 
 # class Category11(Base):
@@ -90,68 +157,3 @@ class Category(Base):
 #     published: Mapped[bool] = mapped_column(default=True)
 #     sub_category: Mapped[list[dict[Any, Any]]] = mapped_column(type_=JSONB, nullable=True, default=None)
 #     filter_category: Mapped[bool] = mapped_column(default=True)
-
-
-class Options(Base):
-    __tablename__ = "options"
-
-    id: Mapped[intpk]
-    nm_id: Mapped[int] = mapped_column(ForeignKey("product.id", ondelete="CASCADE"))
-    card: Mapped[dict[Any, Any]]
-
-
-class Brand(Base):
-    __tablename__ = "brand"
-
-    id: Mapped[intpk]
-    name: Mapped[str]
-
-
-class BrandWB(Base):
-    __tablename__ = "brandwb"
-
-    id: Mapped[intpk]
-    wb_id: Mapped[int]
-    name: Mapped[str]
-
-
-class Product(Base):
-    __tablename__ = "product"
-
-    id: Mapped[intpk]
-    # wb_id: Mapped[int]
-    name: Mapped[str]
-    price: Mapped[int] = mapped_column(default=None)
-    quantity: Mapped[int] = mapped_column(default=0)
-    brand: Mapped[int | None] = mapped_column(
-        ForeignKey("brand.id", onupdate="SET NULL")
-    )
-    category: Mapped[int] = mapped_column(ForeignKey("category.id", ondelete="CASCADE"))
-    root: Mapped[int | None]
-    subjectId: Mapped[int | None]
-    rating: Mapped[int | None]
-    pics: Mapped[dict[Any, Any]]
-    price_history: Mapped[list[dict[Any, Any]]] = mapped_column(type_=JSONB)
-
-    repr_cols_num = 3
-    repr_cols = ("category", "subjectID", "updated")
-
-
-# class ProductWB(Base):
-#     __tablename__ = 'productwb'
-#
-#     id: Mapped[intpk]
-#     wb_id: Mapped[int]
-#     name: Mapped[str]
-#     price: Mapped[int] = mapped_column(default=None)
-#     quantity: Mapped[int] = mapped_column(default=0)
-#     brand: Mapped[int | None] = mapped_column(ForeignKey('brand.id', onupdate='SET NULL'))
-#     category: Mapped[int] = mapped_column(ForeignKey('category.id', ondelete='CASCADE'))
-#     root: Mapped[int | None]
-#     subjectId: Mapped[int | None]
-#     rating: Mapped[int | None]
-#     pics: Mapped[dict[Any, Any]]
-#     price_history: Mapped[list[dict[Any, Any]]] = mapped_column(type_=JSONB)
-#
-#     repr_cols_num = 3
-#     repr_cols = ('category', 'subjectID', 'updated')

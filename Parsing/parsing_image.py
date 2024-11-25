@@ -13,14 +13,14 @@ from database.models import Product
 from database.orm_query import orm_get_products, orm_update_product
 
 HEADERS = {
-    'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
-    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+    "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+    "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
 }
 
-DOWNLOAD_DIR = Path('./Parsing/Media/products_images')
+DOWNLOAD_DIR = Path("./Parsing/Media/products_images")
 TASKS = []
 
-#print(DOWNLOAD_DIR)
+# print(DOWNLOAD_DIR)
 
 
 async def save_image(url_image, filename, dir_image):
@@ -31,28 +31,32 @@ async def save_image(url_image, filename, dir_image):
                 try:
                     r = await response.content.read()
                 except ContentTypeError:
-                    print(f'Content type error, адрес {url_image} попробуем еще позже!')
-                    task = asyncio.create_task(save_image(
-                        url_image=url_image,
-                        filename=filename,
-                        dir_image=dir_image,
-                    ))
+                    print(f"Content type error, адрес {url_image} попробуем еще позже!")
+                    task = asyncio.create_task(
+                        save_image(
+                            url_image=url_image,
+                            filename=filename,
+                            dir_image=dir_image,
+                        )
+                    )
                     TASKS.append(task)
                     print(f"{url_image} задача не выполнена")
                     return
 
                 dir_image.mkdir(parents=True, exist_ok=True)
 
-                async with aiofiles.open(filename, 'wb') as f:
+                async with aiofiles.open(filename, "wb") as f:
                     await f.write(r)
                     print(f"{filename} записан")
 
         except ClientConnectorError as e:
-            task = asyncio.create_task(save_image(
-                url_image=url_image,
-                filename=filename,
-                dir_image=dir_image,
-            ))
+            task = asyncio.create_task(
+                save_image(
+                    url_image=url_image,
+                    filename=filename,
+                    dir_image=dir_image,
+                )
+            )
             TASKS.append(task)
             print(f"Ошибка семафора {e}  {url_image}")
             return
@@ -75,12 +79,9 @@ async def get_url_image():
     #         count += 1
     #         part = product.id // 1000
     #         vol = product.id // 100_000
-    #         data = {
-    #             'id': product.id,
-    #             'updated': datetime.datetime.now(),
-    #             'pics': product.pics
-    #         }
-    #         await orm_update_product(data)
+    #         product.updated = datetime.now()
+
+    #         await orm_update_product(product)
     #
     #         for j in product.pics.values():
     #             url_image = j
@@ -108,4 +109,3 @@ async def get_url_image():
     #             print(f"Не выполненные задачи, что смогли выполнились. осталось {len(tasks)}")
     # m = 'Закончилось выполнение'
     await send_tg_message(m)
-
