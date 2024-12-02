@@ -8,7 +8,7 @@ from Parsing.parsing_catalog import get_all_category, get_sub_category
 from Parsing.parsing_image import get_url_image
 from Parsing.parsing_options import get_options
 from Parsing.parsing_product import get_brands, get_url_product
-from Parsing.parsing_tests import convert_product_price_history, get_one_in_url_product
+from Parsing.parsing_tests import convert_product_price_history, test_test
 from Parsing.utils import get_basket
 
 
@@ -30,7 +30,7 @@ async def main():
     # await get_sub_category()
 
     # получение продуктов
-    # await get_url_product()
+    await get_url_product()
 
     # получение брендов
     # await get_brands()
@@ -47,7 +47,9 @@ async def main():
     # await add_category_tree()
 
     # product = orm_get_product(200417135)
-    await convert_product_price_history()
+    # await convert_product_price_history()
+
+    # await test_test()
 
 
 if __name__ == "__main__":

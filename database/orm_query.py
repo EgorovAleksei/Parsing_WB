@@ -3,7 +3,7 @@ import json
 import asyncio
 from datetime import date, timedelta
 
-from sqlalchemy import column, select, update, delete
+from sqlalchemy import column, select, update, delete, desc, asc
 from sqlalchemy.orm import joinedload, selectinload, aliased
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import load_only
@@ -23,10 +23,10 @@ async def orm_add_categories(obj: Category):
 
 
 async def orm_update_categories(obj: Category):
-    async with session_maker(expire_on_commit=False) as session:
-        # session.merge(obj)
-        session.add(obj)
-        print("Обновлен", obj.id)
+    # async with session_maker(expire_on_commit=False) as session:
+    async with session_maker() as session:
+        await session.merge(obj)
+        # session.add(obj)
         await session.commit()
 
 
@@ -35,7 +35,7 @@ async def orm_get_categories(category_id=None):
         if category_id:
             query = select(Category).where(Category.id == category_id)
         else:
-            query = select(Category)
+            query = select(Category).order_by(asc('updated'))
         result = await session.execute(query)
         return result.scalars().all()
 
@@ -61,19 +61,25 @@ async def orm_add_brand(obj: Brand):
 
 
 async def orm_add_product(obj: Product):
-    async with session_maker() as session:
+    async with session_maker(expire_on_commit=False) as session:
         query = select(Product).where(Product.id == obj.id)
         result = await session.execute(query)
         if result.first() is None:
-            session.add(obj)
-            await session.commit()
+            try:
+                session.add(obj)
+                session.expire_all()
+                await session.commit()
+            except AttributeError as e:
+                print(f"{e} ошибка. такой {obj.id}, {obj.name} уже существует")
+
+        return obj
 
 
 async def orm_get_products():
     async with session_maker() as session:
         # query = select(Product).where(Product.updated < date.today() - timedelta(days=3)).limit(10)
-        product_date = datetime.datetime.strptime("2024-11-24", "%Y-%m-%d")
-        query = select(Product).filter(Product.updated < product_date).limit(30)
+        product_date = datetime.datetime.strptime("2024-11-28 10:00", "%Y-%m-%d %H:%M")
+        query = select(Product).filter(Product.updated > product_date).limit(10)
 
         result = await session.execute(query)
         return result.scalars()
